@@ -7,12 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.db.demo.entity.Product;
+import com.example.db.demo.entity.ProductEntity;
 
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, String>,
-        JpaSpecificationExecutor<Product> {
+public interface ProductRepository extends JpaRepository<ProductEntity, String>,
+        JpaSpecificationExecutor<ProductEntity> {
 
     @Query("update product d set d.price = (:price) where d.code=(:code)")
     @Modifying
@@ -31,9 +31,9 @@ public interface ProductRepository extends JpaRepository<Product, String>,
     @Transactional
     int updatePriceByCodeFlush(@Param("code") String code, @Param("price") Integer price);
 
-    Product findTopByCode(String code);
+    ProductEntity findTopByCode(String code);
 
     @Transactional
     @Query("select d from product d  where d.code=(:code)")
-    Product findTopByCodeFlush(@Param("code") String code);
+    ProductEntity findTopByCodeFlush(@Param("code") String code);
 }

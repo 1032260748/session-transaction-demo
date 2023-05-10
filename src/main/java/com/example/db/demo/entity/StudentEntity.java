@@ -12,7 +12,7 @@ import lombok.experimental.Tolerate;
 @Setter
 @Getter
 @Builder
-public class Student {
+public class StudentEntity {
 
     @Id
     private Long id;
@@ -22,7 +22,8 @@ public class Student {
     private String no;
 
     @Tolerate
-    public Student() {
+    public StudentEntity() {
+        //do nothing
     }
 
 }

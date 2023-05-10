@@ -12,7 +12,7 @@ import lombok.experimental.Tolerate;
 @Getter
 @Builder
 @Entity(name = "product")
-public class Product {
+public class ProductEntity {
 
     private String name;
 
@@ -24,7 +24,7 @@ public class Product {
     private String description;
 
     @Tolerate
-    public Product() {
-
+    public ProductEntity() {
+        //do nothing
     }
 }

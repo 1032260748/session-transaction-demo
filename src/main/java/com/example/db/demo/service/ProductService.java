@@ -1,13 +1,12 @@
 package com.example.db.demo.service;
 
 import java.util.Objects;
-import org.hibernate.internal.SessionImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.db.demo.entity.Product;
+import com.example.db.demo.entity.ProductEntity;
 import com.example.db.demo.repository.ProductRepository;
 import com.example.db.demo.vo.ProductVo;
 import lombok.extern.slf4j.Slf4j;
@@ -23,24 +22,24 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    public Product getByCode(String code) {
+    public ProductEntity getByCode(String code) {
         return productRepository.findTopByCode(code);
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Product updatePrice(ProductVo productVo) {
-        Product product = new Product();
+    public ProductEntity updatePrice(ProductVo productVo) {
+        ProductEntity product = new ProductEntity();
         BeanUtils.copyProperties(productVo, product);
 
         //save
-        Product saveResult = productRepository.save(product);
+        ProductEntity saveResult = productRepository.save(product);
 
         System.out.println("开始更新");
         //price * 100
         Integer fenPrice = product.getPrice() * 100;
         productRepository.updatePriceByCode(product.getCode(), fenPrice);
 
-        Product queryResult = productRepository.findTopByCode(saveResult.getCode());
+        ProductEntity queryResult = productRepository.findTopByCode(saveResult.getCode());
 
         System.out.println(Objects.equals(queryResult, saveResult));
 
@@ -48,18 +47,18 @@ public class ProductService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Product updatePriceFlush(ProductVo productVo) {
-        Product product = new Product();
+    public ProductEntity updatePriceFlush(ProductVo productVo) {
+        ProductEntity product = new ProductEntity();
         BeanUtils.copyProperties(productVo, product);
 
-        Product saveResult = productRepository.save(product);
+        ProductEntity saveResult = productRepository.save(product);
         System.out.println(Objects.equals(product, saveResult));
 
         System.out.println("开始更新");
         Integer fenPrice = product.getPrice() * 100;
         productRepository.updatePriceByCodeFlush(product.getCode(), fenPrice);
 
-        Product queryResult = productRepository.findTopByCode(saveResult.getCode());
+        ProductEntity queryResult = productRepository.findTopByCode(saveResult.getCode());
 
         System.out.println(Objects.equals(queryResult, saveResult));
 
@@ -67,12 +66,12 @@ public class ProductService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Product save2(ProductVo productVo) {
-        Product product = new Product();
+    public ProductEntity save2(ProductVo productVo) {
+        ProductEntity product = new ProductEntity();
         BeanUtils.copyProperties(productVo, product);
 
         //save
-        Product saveResult = productRepository.save(product);
+        ProductEntity saveResult = productRepository.save(product);
         System.out.println("开始更新");
 
         //price * 100
@@ -82,7 +81,7 @@ public class ProductService {
         //SessionImpl merge
         productRepository.save(saveResult);
 
-        Product queryResult = productRepository.findTopByCode(saveResult.getCode());
+        ProductEntity queryResult = productRepository.findTopByCode(saveResult.getCode());
         System.out.println(Objects.equals(queryResult, saveResult));
 
         return queryResult;
@@ -90,7 +89,7 @@ public class ProductService {
 
     @Transactional(rollbackFor = Exception.class)
     public void saveAndDoOtherThing(ProductVo productVo) {
-        Product product = new Product();
+        ProductEntity product = new ProductEntity();
         BeanUtils.copyProperties(productVo, product);
         //save db
         productRepository.save(product);
@@ -101,7 +100,7 @@ public class ProductService {
 
     @Transactional(rollbackFor = Exception.class)
     public void saveFlushAndDoOtherThing(ProductVo productVo) {
-        Product product = new Product();
+        ProductEntity product = new ProductEntity();
         BeanUtils.copyProperties(productVo, product);
         //save db
         productRepository.saveAndFlush(product);
@@ -114,7 +113,7 @@ public class ProductService {
     public void readOnly(String code) {
         //GOODS_020 test code
         productRepository.findTopByCode(code);
-        Product product = productRepository.findTopByCode(code);
+        ProductEntity product = productRepository.findTopByCode(code);
         product.setName("test1111");
     }
 
@@ -122,8 +121,13 @@ public class ProductService {
     public void readAndUpdate(String code, String name) {
         //GOODS_020 test code
         productRepository.findTopByCode(code);
-        Product product = productRepository.findTopByCode(code);
+        ProductEntity product = productRepository.findTopByCode(code);
         product.setName(name);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ProductEntity saveAndFlush(ProductEntity productEntity) {
+        return productRepository.saveAndFlush(productEntity);
     }
 
 }
