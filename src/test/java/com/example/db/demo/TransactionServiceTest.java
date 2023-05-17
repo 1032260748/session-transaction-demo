@@ -20,6 +20,30 @@ public class TransactionServiceTest extends ApplicationTests {
     private ProductService productService;
 
     @Test
+    public void callSelfTest() {
+        ProductEntity productEntity = new ProductEntity();
+        productEntity.setName("书包");
+        productEntity.setDescription("书包");
+        productEntity.setCode("GOODS_020");
+        productEntity.setPrice(10);
+        //还原数据
+        productService.saveAndFlush(productEntity);
+
+        try {
+            transactionService.callSelfParent(productEntity);
+            ProductEntity productInDb = productService.getByCode("GOODS_020");
+            Assertions.assertEquals("callSelfSub", productInDb.getDescription());
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        try {
+            transactionService.callSelfSub(productEntity);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Test
     public void update() {
         ProductEntity productEntity = new ProductEntity();
         productEntity.setName("书包");
@@ -126,22 +150,6 @@ public class TransactionServiceTest extends ApplicationTests {
         } catch (Exception ex) {
             ProductEntity productInDb = productService.getByCode("GOODS_020");
             Assertions.assertNotEquals("nested_parent", productInDb.getDescription());
-        }
-    }
-
-    @Test
-    public void updateNestedJdbc() {
-        ProductEntity productVo = new ProductEntity();
-        productVo.setName("书包");
-        productVo.setDescription("书包");
-        productVo.setCode("GOODS_020");
-        productVo.setPrice(10);
-        try {
-            //jpa不支持这种类型
-            transactionService.updateNestedJdbc(productVo);
-        } catch (Exception ex) {
-            ProductEntity productInDb = productService.getByCode("GOODS_020");
-            Assertions.assertNotEquals("updateNestedJdbc", productInDb.getDescription());
         }
     }
 

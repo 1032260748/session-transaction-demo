@@ -1,6 +1,7 @@
 package com.example.db.demo.service;
 
 import java.util.Objects;
+import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -21,6 +22,23 @@ public class TransactionService {
     @Transactional(rollbackFor = Exception.class)
     public ProductEntity saveProduct(ProductEntity product) {
         return productRepository.saveAndFlush(product);
+    }
+
+    public void callSelfParent(ProductEntity product) {
+        try {
+            System.out.println(AopUtils.isAopProxy(this));
+            callSelfSub(product);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void callSelfSub(ProductEntity product) {
+        System.out.println(AopUtils.isAopProxy(this));
+        product.setDescription("callSelfSub");
+        productRepository.saveAndFlush(product);
+        throw new RuntimeException("error");
     }
 
     @Transactional(rollbackFor = Exception.class)
