@@ -11,7 +11,7 @@ import com.example.db.demo.service.ProductService;
 import com.example.db.demo.service.TransactionService;
 
 
-public class TransactionServiceTest extends ApplicationTests {
+public class TransactionTest extends ApplicationTests {
 
     @Autowired
     private TransactionService transactionService;
@@ -31,7 +31,7 @@ public class TransactionServiceTest extends ApplicationTests {
 
         try {
             transactionService.callSelfParent(productEntity);
-            ProductEntity productInDb = productService.getByCode("GOODS_020");
+            ProductEntity productInDb = productService.findById("GOODS_020");
             Assertions.assertEquals("callSelfSub", productInDb.getDescription());
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -58,7 +58,7 @@ public class TransactionServiceTest extends ApplicationTests {
             transactionService.updateRequire(productEntity);
         } catch (Exception ex) {
             ex.printStackTrace();
-            ProductEntity productInDb = productService.getByCode("GOODS_020");
+            ProductEntity productInDb = productService.findById("GOODS_020");
             Assertions.assertNotEquals("require", productInDb.getDescription());
         }
     }
@@ -77,7 +77,7 @@ public class TransactionServiceTest extends ApplicationTests {
             transactionService.updateRequireSubError(productEntity);
         } catch (Exception ex) {
             ex.printStackTrace();
-            ProductEntity productInDb = productService.getByCode("GOODS_020");
+            ProductEntity productInDb = productService.findById("GOODS_020");
             Assertions.assertNotEquals("updateRequireSubError", productInDb.getDescription());
         }
     }
@@ -96,7 +96,7 @@ public class TransactionServiceTest extends ApplicationTests {
             transactionService.updateRequireNew(productEntity);
         } catch (Exception ex) {
             ex.printStackTrace();
-            ProductEntity productInDb = productService.getByCode("GOODS_020");
+            ProductEntity productInDb = productService.findById("GOODS_020");
             Assertions.assertEquals("require_new", productInDb.getDescription());
         }
     }
@@ -115,7 +115,7 @@ public class TransactionServiceTest extends ApplicationTests {
             transactionService.updateRequireNewSubError(productEntity);
         } catch (Exception ex) {
             ex.printStackTrace();
-            ProductEntity productInDb = productService.getByCode("GOODS_020");
+            ProductEntity productInDb = productService.findById("GOODS_020");
             Assertions.assertEquals("updateRequireNewSubError", productInDb.getDescription());
         }
     }
@@ -132,7 +132,7 @@ public class TransactionServiceTest extends ApplicationTests {
             //外层有transaction，内层调用propagation = Propagation.NEVER
             transactionService.updateSubNever(productVo);
         } catch (Exception ex) {
-            ProductEntity productInDb = productService.getByCode("GOODS_020");
+            ProductEntity productInDb = productService.findById("GOODS_020");
             Assertions.assertNotEquals("never", productInDb.getDescription());
         }
     }
@@ -148,7 +148,7 @@ public class TransactionServiceTest extends ApplicationTests {
             //jpa不支持这种类型
             transactionService.updateNested(productVo);
         } catch (Exception ex) {
-            ProductEntity productInDb = productService.getByCode("GOODS_020");
+            ProductEntity productInDb = productService.findById("GOODS_020");
             Assertions.assertNotEquals("nested_parent", productInDb.getDescription());
         }
     }

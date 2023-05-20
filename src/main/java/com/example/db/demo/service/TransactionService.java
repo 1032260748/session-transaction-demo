@@ -1,16 +1,17 @@
 package com.example.db.demo.service;
 
 import java.util.Objects;
-import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.db.demo.entity.ProductEntity;
 import com.example.db.demo.repository.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
 
 
 @Service
+@Slf4j
 public class TransactionService {
 
     @Autowired
@@ -26,16 +27,14 @@ public class TransactionService {
 
     public void callSelfParent(ProductEntity product) {
         try {
-            System.out.println(AopUtils.isAopProxy(this));
             callSelfSub(product);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("callSelfSub error", ex);
         }
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void callSelfSub(ProductEntity product) {
-        System.out.println(AopUtils.isAopProxy(this));
         product.setDescription("callSelfSub");
         productRepository.saveAndFlush(product);
         throw new RuntimeException("error");
@@ -113,11 +112,7 @@ public class TransactionService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public ProductEntity readCommitted(String code) {
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        sleep(3000);
         return productRepository.findTopByCode(code);
     }
 

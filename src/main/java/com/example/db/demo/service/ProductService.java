@@ -22,8 +22,25 @@ public class ProductService {
     @Autowired
     private ProductRepository productRepository;
 
-    public ProductEntity getByCode(String code) {
-        return productRepository.findTopByCode(code);
+    @Transactional(rollbackFor = Exception.class, readOnly = true)
+    public boolean findTwice(String code) {
+        ProductEntity first = findById(code);
+        ProductEntity second = findById(code);
+        log.info("1: {}", first);
+        log.info("2: {}", second);
+        return first == second;
+    }
+
+    public boolean findTwiceNoTransaction(String code) {
+        ProductEntity first = findById(code);
+        ProductEntity second = findById(code);
+        log.info("1: {}", first);
+        log.info("2: {}", second);
+        return first == second;
+    }
+
+    public ProductEntity findById(String code) {
+        return productRepository.findById(code).orElse(null);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -34,14 +51,14 @@ public class ProductService {
         //save
         ProductEntity saveResult = productRepository.save(product);
 
-        System.out.println("开始更新");
+        log.info("开始更新");
         //price * 100
         Integer fenPrice = product.getPrice() * 100;
         productRepository.updatePriceByCode(product.getCode(), fenPrice);
 
-        ProductEntity queryResult = productRepository.findTopByCode(saveResult.getCode());
+        ProductEntity queryResult = findById(product.getCode());
 
-        System.out.println(Objects.equals(queryResult, saveResult));
+        log.info("是否相等:{}", Objects.equals(queryResult, saveResult));
 
         return queryResult;
     }
@@ -52,16 +69,15 @@ public class ProductService {
         BeanUtils.copyProperties(productVo, product);
 
         ProductEntity saveResult = productRepository.save(product);
-        System.out.println(Objects.equals(product, saveResult));
+        log.info("是否相等:{}", Objects.equals(product, saveResult));
 
-        System.out.println("开始更新");
+        log.info("开始更新");
         Integer fenPrice = product.getPrice() * 100;
         productRepository.updatePriceByCodeFlush(product.getCode(), fenPrice);
 
-        ProductEntity queryResult = productRepository.findTopByCode(saveResult.getCode());
+        ProductEntity queryResult = findById(saveResult.getCode());
 
-        System.out.println(Objects.equals(queryResult, saveResult));
-
+        log.info("是否相等:{}", Objects.equals(queryResult, saveResult));
         return queryResult;
     }
 
@@ -72,7 +88,7 @@ public class ProductService {
 
         //save
         ProductEntity saveResult = productRepository.save(product);
-        System.out.println("开始更新");
+        log.info("开始更新");
 
         //price * 100
         Integer fenPrice = product.getPrice() * 100;
@@ -81,12 +97,15 @@ public class ProductService {
         //SessionImpl merge
         productRepository.save(saveResult);
 
-        ProductEntity queryResult = productRepository.findTopByCode(saveResult.getCode());
-        System.out.println(Objects.equals(queryResult, saveResult));
+        ProductEntity queryResult = findById(saveResult.getCode());
+        log.info("queryResult,saveResult是否相等:{}", Objects.equals(queryResult, saveResult));
 
         return queryResult;
     }
 
+    /**
+     * 延迟提交
+     */
     @Transactional(rollbackFor = Exception.class)
     public void saveAndDoOtherThing(ProductVo productVo) {
         ProductEntity product = new ProductEntity();
@@ -94,7 +113,7 @@ public class ProductService {
         //save db
         productRepository.save(product);
 
-        System.out.println("do other thing");
+        log.info("do other thing");
         stringRedisTemplate.opsForValue().set(productVo.getCode(), Integer.toString(product.getPrice()));
     }
 
@@ -105,24 +124,28 @@ public class ProductService {
         //save db
         productRepository.saveAndFlush(product);
 
-        System.out.println("do other thing");
+        log.info("do other thing");
         stringRedisTemplate.opsForValue().set(productVo.getCode(), Integer.toString(product.getPrice()));
     }
 
     @Transactional(readOnly = true)
     public void readOnly(String code) {
         //GOODS_020 test code
-        productRepository.findTopByCode(code);
-        ProductEntity product = productRepository.findTopByCode(code);
-        product.setName("test1111");
+        findById(code);
+        ProductEntity product = findById(code);
+        if (Objects.nonNull(product)) {
+            product.setName("test1111");
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
     public void readAndUpdate(String code, String name) {
         //GOODS_020 test code
-        productRepository.findTopByCode(code);
-        ProductEntity product = productRepository.findTopByCode(code);
-        product.setName(name);
+        findById(code);
+        ProductEntity product = findById(code);
+        if (Objects.nonNull(product)) {
+            product.setName(name);
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)

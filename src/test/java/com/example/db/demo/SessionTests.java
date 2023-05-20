@@ -14,7 +14,13 @@ public class SessionTests extends ApplicationTests {
     private ProductService productService;
 
     @Test
-    public void testSave() {
+    public void testFindTwice() {
+        Assertions.assertTrue(productService.findTwice("GOODS_020"));
+        Assertions.assertFalse(productService.findTwiceNoTransaction("GOODS_020"));
+    }
+
+    @Test
+    public void testUpdatePriceNotChange() {
         ProductVo productVo = new ProductVo();
         productVo.setName("书包");
         productVo.setDescription("书包");
@@ -27,7 +33,7 @@ public class SessionTests extends ApplicationTests {
     }
 
     @Test
-    public void testSaveAndFlush() {
+    public void testUpdatePriceChanged() {
         ProductVo productVo = new ProductVo();
         productVo.setName("书包");
         productVo.setDescription("书包");
@@ -79,7 +85,7 @@ public class SessionTests extends ApplicationTests {
     public void testReadAndUpdate() {
         productService.readAndUpdate("GOODS_020", "123");
 
-        ProductEntity product = productService.getByCode("GOODS_020");
+        ProductEntity product = productService.findById("GOODS_020");
         System.out.println(product.getName());
     }
 
