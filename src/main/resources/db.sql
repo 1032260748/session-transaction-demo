@@ -5,3 +5,12 @@ CREATE TABLE `product` (
                            `description` varchar(200) COLLATE utf8mb3_unicode_ci DEFAULT NULL,
                            PRIMARY KEY (`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+
+create table `student`
+(
+    id   bigint auto_increment
+        primary key,
+    name varchar(64) null,
+    no   varchar(64) null
+)ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+
