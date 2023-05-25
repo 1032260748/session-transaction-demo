@@ -32,4 +32,11 @@ public class StudentService {
         return first != null && first == second;
     }
 
+    public boolean findTwiceNoTransaction(Long id) {
+        StudentEntity first = repository.findById(id).orElse(null);
+        StudentEntity second = repository.findById(id).orElse(null);
+        log.info("是否相等:{}", first != null && first == second);
+        return first != null && first == second;
+    }
+
 }

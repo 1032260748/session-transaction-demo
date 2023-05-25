@@ -16,4 +16,10 @@ public class StudentTest extends ApplicationTests {
         //service.init();
         Assertions.assertTrue(service.findTwice(1L));
     }
+
+    @Test
+    public void testFindTwiceNoTransaction() {
+        //service.init();
+        Assertions.assertFalse(service.findTwiceNoTransaction(1L));
+    }
 }
