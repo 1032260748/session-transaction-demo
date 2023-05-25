@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,12 +13,23 @@ import lombok.Setter;
 import lombok.experimental.Tolerate;
 
 
+/**
+ * <p>
+ * 支持二级缓存
+ * 添加Cacheable
+ * </p>
+ *
+ * @author jwang38@paypal.com
+ * @version v1.0.0
+ * @copyright Copyright(c) 2011-2020, Gopay All Rights Reserved.
+ * @date 2023-05-25 14:00:13
+ */
 @Entity(name = "student")
 @Setter
 @Getter
 @Builder
-@Cacheable(true)  //添加Cacheable
-@org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+@Cacheable
+@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
 public class StudentEntity {
 
     @Id
