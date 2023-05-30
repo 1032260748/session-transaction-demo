@@ -16,6 +16,10 @@ public class SessionTests extends ApplicationTests {
     @Test
     public void testFindTwice() {
         Assertions.assertTrue(productService.findTwice("GOODS_020"));
+    }
+
+    @Test
+    public void testFindTwiceNoTrans() {
         Assertions.assertFalse(productService.findTwiceNoTransaction("GOODS_020"));
     }
 
