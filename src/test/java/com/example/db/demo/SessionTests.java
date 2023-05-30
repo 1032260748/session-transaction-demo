@@ -15,12 +15,12 @@ public class SessionTests extends ApplicationTests {
 
     @Test
     public void testFindTwice() {
-        Assertions.assertTrue(productService.findTwice("GOODS_020"));
+        Assertions.assertTrue(productService.findTwice(PRODUCT_CODE));
     }
 
     @Test
     public void testFindTwiceNoTrans() {
-        Assertions.assertFalse(productService.findTwiceNoTransaction("GOODS_020"));
+        Assertions.assertFalse(productService.findTwiceNoTransaction(PRODUCT_CODE));
     }
 
     @Test
@@ -28,7 +28,7 @@ public class SessionTests extends ApplicationTests {
         ProductVo productVo = new ProductVo();
         productVo.setName("书包");
         productVo.setDescription("书包");
-        productVo.setCode("GOODS_020");
+        productVo.setCode(PRODUCT_CODE);
         productVo.setPrice(10);
 
         ProductEntity product = productService.updatePrice(productVo);
@@ -41,7 +41,7 @@ public class SessionTests extends ApplicationTests {
         ProductVo productVo = new ProductVo();
         productVo.setName("书包");
         productVo.setDescription("书包");
-        productVo.setCode("GOODS_020");
+        productVo.setCode(PRODUCT_CODE);
         productVo.setPrice(10);
 
         ProductEntity product = productService.updatePriceFlush(productVo);
@@ -82,14 +82,23 @@ public class SessionTests extends ApplicationTests {
 
     @Test
     public void testReadOnly() {
-        productService.readOnly("GOODS_020");
+        //重置数据
+        initProduct();
+        String desc = "testReadOnly";
+        productService.readOnlyAndUpdateDesc(PRODUCT_CODE, desc);
+        ProductEntity product = productService.findById(PRODUCT_CODE);
+        Assertions.assertNotEquals(desc, product.getDescription());
     }
 
     @Test
     public void testReadAndUpdate() {
-        productService.readAndUpdate("GOODS_020", "123");
-        ProductEntity product = productService.findById("GOODS_020");
+        //重置数据
+        initProduct();
+        String desc = "testReadAndUpdate";
+        productService.readAndUpdateDesc(PRODUCT_CODE, desc);
+        ProductEntity product = productService.findById(PRODUCT_CODE);
         System.out.println(product.getName());
+        Assertions.assertEquals(desc, product.getDescription());
     }
 
     @Test
@@ -97,7 +106,7 @@ public class SessionTests extends ApplicationTests {
         ProductVo productVo = new ProductVo();
         productVo.setName("书包");
         productVo.setDescription("书包");
-        productVo.setCode("GOODS_020");
+        productVo.setCode(PRODUCT_CODE);
         productVo.setPrice(10);
 
         ProductEntity product = productService.save2(productVo);

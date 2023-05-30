@@ -3,39 +3,10 @@ package com.example.db.demo;
 import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import com.example.db.demo.entity.ProductEntity;
-import com.example.db.demo.service.ProductService;
-import com.example.db.demo.service.TransactionService;
 
 
 public class TransactionTest extends ApplicationTests {
-
-    @Autowired
-    private TransactionService transactionService;
-
-    @Autowired
-    private ProductService productService;
-
-    public static final String PRODUCT_CODE = "01";
-
-    /**
-     * <p>
-     * 还原数据
-     * </p>
-     *
-     * @author jwang38@paypal.com
-     * @date 2023-05-30 17:21:29
-     */
-    private ProductEntity initProduct() {
-        ProductEntity productEntity = new ProductEntity();
-        productEntity.setName("书包");
-        productEntity.setDescription("书包");
-        productEntity.setCode(PRODUCT_CODE);
-        productEntity.setPrice(10);
-        //还原数据
-        return productService.saveAndFlush(productEntity);
-    }
 
     @Test
     public void testCallSelf() {
@@ -232,13 +203,6 @@ public class TransactionTest extends ApplicationTests {
 
         CompletableFuture.allOf(future).join();
         Assertions.assertTrue(result);
-    }
-
-    protected CompletableFuture runAsync(Runnable runnable) {
-        return CompletableFuture.runAsync(runnable).exceptionally(throwable -> {
-            throwable.printStackTrace();
-            return null;
-        });
     }
 
 }

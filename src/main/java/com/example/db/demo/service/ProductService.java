@@ -133,22 +133,20 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
-    public void readOnly(String code) {
-        //GOODS_020 test code
-        findById(code);
+    public void readOnlyAndUpdateDesc(String code, String description) {
+        //findById(code);
         ProductEntity product = findById(code);
         if (Objects.nonNull(product)) {
-            product.setName("test1111");
+            product.setDescription(description);
         }
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void readAndUpdate(String code, String name) {
-        //GOODS_020 test code
-        findById(code);
+    public void readAndUpdateDesc(String code, String description) {
+        //findById(code);
         ProductEntity product = findById(code);
         if (Objects.nonNull(product)) {
-            product.setName(name);
+            product.setDescription(description);
         }
     }
 
