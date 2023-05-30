@@ -7,6 +7,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.db.demo.entity.ProductEntity;
+import com.example.db.demo.helper.EntityManagerHelper;
 import com.example.db.demo.repository.ProductRepository;
 import com.example.db.demo.vo.ProductVo;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,9 @@ public class ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private EntityManagerHelper entityManagerHelper;
 
     @Transactional(rollbackFor = Exception.class, readOnly = true)
     public boolean findTwice(String code) {

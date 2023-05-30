@@ -56,7 +56,7 @@ public class SessionTests extends ApplicationTests {
                     //db name非空
                     productVo.setName(null);
                     productVo.setDescription("手机");
-                    productVo.setCode("GOODS_021");
+                    productVo.setCode("002");
                     productVo.setPrice(5000);
 
                     productService.saveAndDoOtherThing(productVo);
@@ -71,7 +71,7 @@ public class SessionTests extends ApplicationTests {
                     //db name非空
                     productVo.setName(null);
                     productVo.setDescription("电脑");
-                    productVo.setCode("GOODS_022");
+                    productVo.setCode("003");
                     productVo.setPrice(15000);
 
                     productService.saveFlushAndDoOtherThing(productVo);
@@ -88,7 +88,6 @@ public class SessionTests extends ApplicationTests {
     @Test
     public void testReadAndUpdate() {
         productService.readAndUpdate("GOODS_020", "123");
-
         ProductEntity product = productService.findById("GOODS_020");
         System.out.println(product.getName());
     }

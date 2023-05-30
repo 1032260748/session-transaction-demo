@@ -1,11 +1,14 @@
 package com.example.db.demo.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.db.demo.entity.ProductEntity;
+import com.example.db.demo.helper.EntityManagerHelper;
 import com.example.db.demo.repository.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 
@@ -19,6 +22,9 @@ public class TransactionService {
 
     @Autowired
     private SubTransService subTransService;
+
+    @Autowired
+    private EntityManagerHelper entityManagerHelper;
 
     @Transactional(rollbackFor = Exception.class)
     public ProductEntity saveProduct(ProductEntity product) {
@@ -117,7 +123,7 @@ public class TransactionService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public void repeatableRead(String code, String desc) {
+    public void updateDescription(String code, String desc) {
         sleep(2000);
         ProductEntity product = productRepository.findTopByCode(code);
         product.setDescription(desc);
@@ -125,27 +131,56 @@ public class TransactionService {
     }
 
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
-    public boolean repeatableReadEqual(String code) {
-        ProductEntity product = productRepository.findTopByCodeFlush(code);
-        String oldDesc = product.getDescription();
+    public boolean readCommitReadTwice(String code) {
+        ProductEntity oldProduct = productRepository.findTopByCode(code);
+        String oldDesc = oldProduct.getDescription();
+
         sleep(6000);
-        //clear一级缓存
-        productRepository.updatePriceByCodeFlush(code, product.getPrice());
-        product = productRepository.findTopByCodeFlush(code);
-        String newDesc = product.getDescription();
+
+        //clear缓存
+        entityManagerHelper.clear();
+
+        ProductEntity newProduct = productRepository.findTopByCode(code);
+        String newDesc = newProduct.getDescription();
         return Objects.equals(oldDesc, newDesc);
     }
 
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.REPEATABLE_READ)
-    public boolean repeatableReadEqual2(String code) {
-        ProductEntity product = productRepository.findTopByCodeFlush(code);
-        String oldDesc = product.getDescription();
+    public boolean repeatableReadTwice(String code) {
+        ProductEntity oldProduct = productRepository.findTopByCode(code);
+        String oldDesc = oldProduct.getDescription();
+
         sleep(6000);
-        //clear一级缓存
-        productRepository.updatePriceByCodeFlush(code, product.getPrice());
-        product = productRepository.findTopByCodeFlush(code);
-        String newDesc = product.getDescription();
+        //clear缓存
+        entityManagerHelper.clear();
+
+        ProductEntity newProduct = productRepository.findTopByCode(code);
+        String newDesc = newProduct.getDescription();
         return Objects.equals(oldDesc, newDesc);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public ProductEntity insertNewPhantom(String desc) {
+        sleep(3000);
+        String productCode = Long.toString(System.currentTimeMillis());
+        ProductEntity product = new ProductEntity();
+        product.setName(productCode);
+        product.setCode(productCode);
+        product.setPrice(0);
+        product.setDescription(desc);
+        return productRepository.saveAndFlush(product);
+    }
+
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.REPEATABLE_READ)
+    public boolean repeatableReadPhantom(String description) {
+        List<ProductEntity> oldList = productRepository.findAllByDescription(description);
+
+        sleep(6000);
+        //clear缓存
+        entityManagerHelper.clear();
+
+        List<ProductEntity> newList = productRepository.findAllByDescription(description);
+        return Objects.equals(oldList.size(), newList.size());
     }
 
     private void sleep(long millis) {

@@ -1,5 +1,6 @@
 package com.example.db.demo.repository;
 
+import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -33,7 +34,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity, String>,
 
     ProductEntity findTopByCode(String code);
 
-    @Transactional
-    @Query("select d from product d  where d.code=(:code)")
-    ProductEntity findTopByCodeFlush(@Param("code") String code);
+    List<ProductEntity> findAllByDescription(@Param("desc") String desc);
+
 }

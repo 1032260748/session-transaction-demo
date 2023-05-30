@@ -1,8 +1,6 @@
 package com.example.db.demo;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,163 +17,153 @@ public class TransactionTest extends ApplicationTests {
     @Autowired
     private ProductService productService;
 
-    @Test
-    public void callSelfTest() {
+    public static final String PRODUCT_CODE = "01";
+
+    /**
+     * <p>
+     * 还原数据
+     * </p>
+     *
+     * @author jwang38@paypal.com
+     * @date 2023-05-30 17:21:29
+     */
+    private ProductEntity initProduct() {
         ProductEntity productEntity = new ProductEntity();
         productEntity.setName("书包");
         productEntity.setDescription("书包");
-        productEntity.setCode("GOODS_020");
+        productEntity.setCode(PRODUCT_CODE);
         productEntity.setPrice(10);
         //还原数据
-        productService.saveAndFlush(productEntity);
+        return productService.saveAndFlush(productEntity);
+    }
 
+    @Test
+    public void testCallSelf() {
         try {
+            ProductEntity productEntity = initProduct();
             transactionService.callSelfParent(productEntity);
-            ProductEntity productInDb = productService.findById("GOODS_020");
+            ProductEntity productInDb = productService.findById(PRODUCT_CODE);
             Assertions.assertEquals("callSelfSub", productInDb.getDescription());
         } catch (Exception ex) {
             ex.printStackTrace();
         }
         try {
+            ProductEntity productEntity = initProduct();
             transactionService.callSelfSub(productEntity);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+
+        ProductEntity productInDb = productService.findById(PRODUCT_CODE);
+        Assertions.assertNotEquals("callSelfSub", productInDb.getDescription());
     }
 
     @Test
-    public void update() {
-        ProductEntity productEntity = new ProductEntity();
-        productEntity.setName("书包");
-        productEntity.setDescription("书包");
-        productEntity.setCode("GOODS_020");
-        productEntity.setPrice(10);
-        //还原数据
-        productService.saveAndFlush(productEntity);
-
+    public void testTransactionRequire() {
         try {
+            //还原数据
+            ProductEntity productEntity = initProduct();
             //外层transaction抛异常，内层transaction修改production描述
             transactionService.updateRequire(productEntity);
         } catch (Exception ex) {
             ex.printStackTrace();
-            ProductEntity productInDb = productService.findById("GOODS_020");
+            ProductEntity productInDb = productService.findById(PRODUCT_CODE);
             Assertions.assertNotEquals("require", productInDb.getDescription());
         }
     }
 
     @Test
-    public void updateRequireSubError() {
-        ProductEntity productEntity = new ProductEntity();
-        productEntity.setName("书包");
-        productEntity.setDescription("书包");
-        productEntity.setCode("GOODS_020");
-        productEntity.setPrice(10);
-        //还原数据
-        productService.saveAndFlush(productEntity);
+    public void testRequireSubError() {
         try {
+            //还原数据
+            ProductEntity productEntity = initProduct();
             //外层transaction抛异常，内层transaction修改production描述
             transactionService.updateRequireSubError(productEntity);
         } catch (Exception ex) {
             ex.printStackTrace();
-            ProductEntity productInDb = productService.findById("GOODS_020");
+            ProductEntity productInDb = productService.findById(PRODUCT_CODE);
             Assertions.assertNotEquals("updateRequireSubError", productInDb.getDescription());
         }
     }
 
     @Test
     public void updateRequireNew() {
-        ProductEntity productEntity = new ProductEntity();
-        productEntity.setName("书包");
-        productEntity.setDescription("书包");
-        productEntity.setCode("GOODS_020");
-        productEntity.setPrice(10);
-        //还原数据
-        productService.saveAndFlush(productEntity);
         try {
+            //还原数据
+            ProductEntity productEntity = initProduct();
             //外层transaction抛异常，内层transaction修改production描述
             transactionService.updateRequireNew(productEntity);
         } catch (Exception ex) {
             ex.printStackTrace();
-            ProductEntity productInDb = productService.findById("GOODS_020");
+            ProductEntity productInDb = productService.findById(PRODUCT_CODE);
             Assertions.assertEquals("require_new", productInDb.getDescription());
         }
     }
 
     @Test
     public void updateRequireNewSubError() {
-        ProductEntity productEntity = new ProductEntity();
-        productEntity.setName("书包");
-        productEntity.setDescription("书包");
-        productEntity.setCode("GOODS_020");
-        productEntity.setPrice(10);
-        //还原数据
-        productService.saveAndFlush(productEntity);
         try {
+            //还原数据
+            ProductEntity productEntity = initProduct();
             //外层transaction抛异常，内层transaction修改production描述
             transactionService.updateRequireNewSubError(productEntity);
         } catch (Exception ex) {
             ex.printStackTrace();
-            ProductEntity productInDb = productService.findById("GOODS_020");
+            ProductEntity productInDb = productService.findById(PRODUCT_CODE);
             Assertions.assertEquals("updateRequireNewSubError", productInDb.getDescription());
         }
     }
 
     @Test
     public void updateSubNever() {
-        ProductEntity productVo = new ProductEntity();
-        productVo.setName("书包");
-        productVo.setDescription("书包");
-        productVo.setCode("GOODS_020");
-        productVo.setPrice(10);
-
         try {
+            //还原数据
+            ProductEntity productEntity = initProduct();
             //外层有transaction，内层调用propagation = Propagation.NEVER
-            transactionService.updateSubNever(productVo);
+            transactionService.updateSubNever(productEntity);
         } catch (Exception ex) {
-            ProductEntity productInDb = productService.findById("GOODS_020");
+            ProductEntity productInDb = productService.findById(PRODUCT_CODE);
             Assertions.assertNotEquals("never", productInDb.getDescription());
         }
     }
 
     @Test
     public void updateNestedJpa() {
-        ProductEntity productVo = new ProductEntity();
-        productVo.setName("书包");
-        productVo.setDescription("书包");
-        productVo.setCode("GOODS_020");
-        productVo.setPrice(10);
         try {
+            ProductEntity productEntity = initProduct();
             //jpa不支持这种类型
-            transactionService.updateNested(productVo);
+            transactionService.updateNested(productEntity);
         } catch (Exception ex) {
-            ProductEntity productInDb = productService.findById("GOODS_020");
+            ProductEntity productInDb = productService.findById(PRODUCT_CODE);
             Assertions.assertNotEquals("nested_parent", productInDb.getDescription());
         }
     }
 
     @Test
     public void testReadDirty() {
-        Runnable runnable = () -> transactionService.insertProduct("testReadDirty");
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(10, 20,
-                1, TimeUnit.MINUTES, new ArrayBlockingQueue(10));
-        threadPoolExecutor.execute(runnable);
+        CompletableFuture future = runAsync(() -> {
+                    transactionService.insertProduct("testReadDirty");
+                }
+        );
         ProductEntity product = transactionService.dirtyRead("testReadDirty");
+        CompletableFuture.allOf(future).join();
         Assertions.assertNotNull(product);
     }
 
     @Test
     public void testReadCommitted() {
-        Runnable runnable = () -> transactionService.insertProduct("testReadCommitted");
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(10, 20,
-                1, TimeUnit.MINUTES, new ArrayBlockingQueue(10));
-        threadPoolExecutor.execute(runnable);
+        CompletableFuture future = runAsync(() -> {
+                    transactionService.insertProduct("testReadCommitted");
+                }
+        );
         ProductEntity product = transactionService.readCommitted("testReadCommitted");
+        CompletableFuture.allOf(future).join();
         Assertions.assertNull(product);
     }
 
     @Test
-    public void repeatableRead01() {
-        String productCode = "repeatableRead01";
+    public void testReadCommitRepeatRead() {
+        String productCode = "testReadCommitRepeatRead";
 
         ProductEntity product = new ProductEntity();
         product.setName("product");
@@ -184,17 +172,20 @@ public class TransactionTest extends ApplicationTests {
         product.setDescription("old");
         transactionService.saveProduct(product);
 
-        Runnable runnable = () -> transactionService.repeatableRead(productCode, "new");
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(10, 20,
-                1, TimeUnit.MINUTES, new ArrayBlockingQueue(10));
-        threadPoolExecutor.execute(runnable);
-        boolean result = transactionService.repeatableReadEqual(productCode);
+        CompletableFuture future = runAsync(() -> {
+                    transactionService.updateDescription(productCode, "new");
+                }
+        );
+        boolean result = transactionService.readCommitReadTwice(productCode);
+
+        CompletableFuture.allOf(future).join();
+
         Assertions.assertFalse(result);
     }
 
     @Test
-    public void repeatableRead02() {
-        String productCode = "repeatableRead02";
+    public void testRepeatableRead() {
+        String productCode = "testRepeatableRead";
 
         ProductEntity product = new ProductEntity();
         product.setName("product");
@@ -203,12 +194,51 @@ public class TransactionTest extends ApplicationTests {
         product.setDescription("old");
         transactionService.saveProduct(product);
 
-        Runnable runnable = () -> transactionService.repeatableRead(productCode, "new");
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(10, 20,
-                1, TimeUnit.MINUTES, new ArrayBlockingQueue(10));
-        threadPoolExecutor.execute(runnable);
-        boolean result = transactionService.repeatableReadEqual2(productCode);
+        Runnable runnable = () -> transactionService.updateDescription(productCode, "new");
+
+        CompletableFuture future = runAsync(runnable);
+
+        boolean result = transactionService.repeatableReadTwice(productCode);
+
+        CompletableFuture.allOf(future).join();
         Assertions.assertTrue(result);
+    }
+
+    /**
+     * <p>
+     * 幻读测试
+     * </p>
+     *
+     * @author jwang38@paypal.com
+     * @date 2023-05-30 17:58:07
+     */
+    @Test
+    public void testRepeatableReadPhantom() {
+        String desc = "testRepeatableReadPhantom";
+        String productCode = Long.toString(System.currentTimeMillis());
+
+        ProductEntity product = new ProductEntity();
+        product.setName("product");
+        product.setCode(productCode);
+        product.setPrice(10);
+        product.setDescription("testRepeatableReadPhantom");
+        transactionService.saveProduct(product);
+
+        Runnable runnable = () -> transactionService.insertNewPhantom(desc);
+
+        CompletableFuture future = runAsync(runnable);
+
+        boolean result = transactionService.repeatableReadPhantom(desc);
+
+        CompletableFuture.allOf(future).join();
+        Assertions.assertTrue(result);
+    }
+
+    protected CompletableFuture runAsync(Runnable runnable) {
+        return CompletableFuture.runAsync(runnable).exceptionally(throwable -> {
+            throwable.printStackTrace();
+            return null;
+        });
     }
 
 }
