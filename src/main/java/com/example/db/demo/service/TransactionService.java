@@ -1,6 +1,5 @@
 package com.example.db.demo.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,6 +148,7 @@ public class TransactionService {
     public boolean repeatableReadTwice(String code) {
         ProductEntity oldProduct = productRepository.findTopByCode(code);
         String oldDesc = oldProduct.getDescription();
+        log.info("old description:{}", oldDesc);
 
         sleep(6000);
         //clear缓存
@@ -156,6 +156,7 @@ public class TransactionService {
 
         ProductEntity newProduct = productRepository.findTopByCode(code);
         String newDesc = newProduct.getDescription();
+        log.info("new description:{}", newDesc);
         return Objects.equals(oldDesc, newDesc);
     }
 
@@ -174,12 +175,14 @@ public class TransactionService {
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.REPEATABLE_READ)
     public boolean repeatableReadPhantom(String description) {
         List<ProductEntity> oldList = productRepository.findAllByDescription(description);
+        log.info("old list size:{}", oldList.size());
 
         sleep(6000);
         //clear缓存
         entityManagerHelper.clear();
 
         List<ProductEntity> newList = productRepository.findAllByDescription(description);
+        log.info("new list size:{}", newList.size());
         return Objects.equals(oldList.size(), newList.size());
     }
 

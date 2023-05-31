@@ -98,6 +98,14 @@ public class TransactionTest extends ApplicationTests {
         }
     }
 
+    /**
+     * <p>
+     * 嵌套事务测试
+     * </p>
+     *
+     * @author jwang38@paypal.com
+     * @date 2023-05-31 09:47:28
+     */
     @Test
     public void updateNestedJpa() {
         try {
