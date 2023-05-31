@@ -24,6 +24,11 @@ public class SessionTests extends ApplicationTests {
     }
 
     @Test
+    public void testFindByCodeTwice() {
+        Assertions.assertTrue(productService.findCodeTwice(PRODUCT_CODE));
+    }
+
+    @Test
     public void testUpdatePriceNotChange() {
         ProductVo productVo = new ProductVo();
         productVo.setName("书包");
@@ -80,6 +85,15 @@ public class SessionTests extends ApplicationTests {
 
     }
 
+    /**
+     * <p>
+     * 开启readOnly
+     * 测试保证缓存中的对象与数据库中的相关记录保持同步。
+     * </p>
+     *
+     * @author jwang38@paypal.com
+     * @date 2023-05-31 14:05:59
+     */
     @Test
     public void testReadOnly() {
         //重置数据
@@ -90,6 +104,14 @@ public class SessionTests extends ApplicationTests {
         Assertions.assertNotEquals(desc, product.getDescription());
     }
 
+    /**
+     * <p>
+     * 测试保证缓存中的对象与数据库中的相关记录保持同步。
+     * </p>
+     *
+     * @author jwang38@paypal.com
+     * @date 2023-05-31 14:05:33
+     */
     @Test
     public void testReadAndUpdate() {
         //重置数据
@@ -97,7 +119,7 @@ public class SessionTests extends ApplicationTests {
         String desc = "testReadAndUpdate";
         productService.readAndUpdateDesc(PRODUCT_CODE, desc);
         ProductEntity product = productService.findById(PRODUCT_CODE);
-        System.out.println(product.getName());
+        System.out.println(product.getDescription());
         Assertions.assertEquals(desc, product.getDescription());
     }
 

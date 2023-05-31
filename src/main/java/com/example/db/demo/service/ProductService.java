@@ -1,10 +1,14 @@
 package com.example.db.demo.service;
 
+import java.util.Map;
 import java.util.Objects;
+import javax.persistence.EntityManager;
+import org.hibernate.internal.SessionImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.db.demo.entity.ProductEntity;
 import com.example.db.demo.helper.EntityManagerHelper;
@@ -38,6 +42,24 @@ public class ProductService {
     public boolean findTwiceNoTransaction(String code) {
         ProductEntity first = findById(code);
         ProductEntity second = findById(code);
+        log.info("1: {}", first);
+        log.info("2: {}", second);
+        return first == second;
+    }
+
+    @Transactional(rollbackFor = Exception.class, readOnly = true)
+    public boolean findCodeTwice(String code) {
+        ProductEntity first = productRepository.findTopByCode(code);
+
+        EntityManager entityManager = entityManagerHelper.getEntityManager();
+        if (entityManager != null) {
+            SessionImpl session = (SessionImpl) entityManager;
+            Map<String, Object> map = session.getPersistenceContext().getEntitiesByKey();
+            log.info("map size: {}", map.size());
+            //entityManager.clear();
+        }
+
+        ProductEntity second = productRepository.findTopByCode(code);
         log.info("1: {}", first);
         log.info("2: {}", second);
         return first == second;
