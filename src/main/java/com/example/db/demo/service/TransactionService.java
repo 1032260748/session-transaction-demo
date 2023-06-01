@@ -167,7 +167,7 @@ public class TransactionService {
         ProductEntity product = new ProductEntity();
         product.setName(productCode);
         product.setCode(productCode);
-        product.setPrice(0);
+        product.setPrice(10);
         product.setDescription(desc);
         return productRepository.saveAndFlush(product);
     }

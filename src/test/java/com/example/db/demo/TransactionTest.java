@@ -197,10 +197,10 @@ public class TransactionTest extends ApplicationTests {
         String productCode = Long.toString(System.currentTimeMillis());
 
         ProductEntity product = new ProductEntity();
-        product.setName("product");
+        product.setName(productCode);
         product.setCode(productCode);
         product.setPrice(10);
-        product.setDescription("testRepeatableReadPhantom");
+        product.setDescription(desc);
         transactionService.saveProduct(product);
 
         Runnable runnable = () -> transactionService.insertNewPhantom(desc);
