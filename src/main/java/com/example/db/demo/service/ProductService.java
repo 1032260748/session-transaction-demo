@@ -177,4 +177,31 @@ public class ProductService {
         return productRepository.saveAndFlush(productEntity);
     }
 
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
+    public boolean findTwiceReadCommit(String code) {
+        ProductEntity first = findById(code);
+        sleep(6000);
+        //entityManagerHelper.clear();
+        ProductEntity second = findById(code);
+        log.info("1: {}", first.getDescription());
+        log.info("2: {}", second.getDescription());
+        return Objects.equals(first.getDescription(), second.getDescription());
+    }
+
+    private void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED)
+    public void updateDescription(String code, String desc) {
+        sleep(3000);
+        ProductEntity product = productRepository.findTopByCode(code);
+        product.setDescription(desc);
+        productRepository.saveAndFlush(product);
+    }
+
 }

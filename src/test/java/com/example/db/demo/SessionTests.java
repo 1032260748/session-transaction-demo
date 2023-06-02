@@ -1,5 +1,6 @@
 package com.example.db.demo;
 
+import java.util.concurrent.CompletableFuture;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,4 +135,30 @@ public class SessionTests extends ApplicationTests {
         ProductEntity product = productService.save2(productVo);
         System.out.println(product.getPrice());
     }
+
+    /**
+     * <p>
+     * session会影响 readCommit
+     * </p>
+     *
+     * @copyright Copyright(c) 2011-2020, Gopay All Rights Reserved.
+     * @author jwang38@paypal.com
+     * @version v1.0.0
+     * @date 2023-06-02 11:46:35
+     */
+    @Test
+    public void testFindTwiceReadCommit() {
+        initProduct();
+        String productCode = PRODUCT_CODE;
+        Runnable runnable = () -> productService.updateDescription(productCode,
+                Long.toString(System.currentTimeMillis()));
+
+        CompletableFuture future = runAsync(runnable);
+
+        boolean result = productService.findTwiceReadCommit(productCode);
+
+        CompletableFuture.allOf(future).join();
+        Assertions.assertTrue(result);
+    }
+
 }
