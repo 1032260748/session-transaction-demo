@@ -186,6 +186,26 @@ public class TransactionService {
         return Objects.equals(oldList.size(), newList.size());
     }
 
+    /**
+     * Spring事务超时 = 事务开始时到最后一个Statement创建时时间 + 最后一个Statement的执行时超时时间
+     *
+     * @param code
+     */
+    @Transactional(rollbackFor = Exception.class, timeout = 3)
+    public void timeoutTest(String code) {
+        productRepository.findById(code);
+        sleep(6000);
+        productRepository.findAllByDescription(code);
+        log.info("timeoutTest execute end");
+    }
+
+    @Transactional(rollbackFor = Exception.class, timeout = 3)
+    public void timeoutSleep(String code) {
+        productRepository.findById(code);
+        sleep(6000);
+        log.info("timeoutTest execute end");
+    }
+
     private void sleep(long millis) {
         try {
             Thread.sleep(millis);

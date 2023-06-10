@@ -1,5 +1,6 @@
 package com.example.db.demo.helper;
 
+import java.util.Objects;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +16,10 @@ public class EntityManagerHelper {
     private EntityManagerFactory entityManagerFactory;
 
     public void clear() {
-        Object obj = TransactionSynchronizationManager.getResource(this.entityManagerFactory);
-        EntityManagerHolder entityManagerHolder = (EntityManagerHolder) obj;
-        if (entityManagerHolder != null) {
-            entityManagerHolder.getEntityManager().flush();
-            entityManagerHolder.getEntityManager().clear();
+        EntityManager entityManager = getEntityManager();
+        if (Objects.nonNull(entityManager)) {
+            entityManager.flush();
+            entityManager.clear();
         }
     }
 
